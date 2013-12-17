@@ -22,8 +22,6 @@ class Hybrid_Error
 		Hybrid_Auth::storage()->set( "hauth_session.error.status"  , 1         );
 		Hybrid_Auth::storage()->set( "hauth_session.error.message" , $message  );
 		Hybrid_Auth::storage()->set( "hauth_session.error.code"    , $code     );
-		Hybrid_Auth::storage()->set( "hauth_session.error.trace"   , $trace    );
-		Hybrid_Auth::storage()->set( "hauth_session.error.previous", $previous );
 	}
 
 	/**
