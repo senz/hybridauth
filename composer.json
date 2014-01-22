@@ -21,8 +21,9 @@
         "ext-curl": "*"
     },
     "autoload": {
+        "classmap": ["hybridauth/Hybrid/"],
         "psr-0": {
             "Hybrid": "hybridauth/"
-        } 
+        }
     }
 }
