@@ -49,8 +49,6 @@ class Hybrid_Providers_Facebook extends Hybrid_Provider_Model
 
 			$this->api->setAccessToken( $this->token("access_token") );
 		}
-
-		$this->api->getUser();
 	}
 
 	/**
@@ -86,10 +84,14 @@ class Hybrid_Providers_Facebook extends Hybrid_Provider_Model
 			throw new Exception( "Authentication failed! The user denied your request.", 5 );
 		}
 
-		// try to get the UID of the connected user from fb, should be > 0 
-		if ( ! $this->api->getUser() ){
+		// try to get the UID of the connected user from fb, should be > 0
+		$user_id = $this->api->getUser();
+		if ( ! $user_id ){
 			throw new Exception( "Authentication failed! {$this->providerId} returned an invalid user id.", 5 );
 		}
+
+		// store user id. it is required for api access to Facebook
+		Hybrid_Auth::storage()->set( "hauth_session.{$this->providerId}.user_id", $user_id );
 
 		// set user as logged in
 		$this->setUserConnected();
@@ -149,7 +151,7 @@ class Hybrid_Providers_Facebook extends Hybrid_Provider_Model
 		}
 
 		return $this->user->profile;
- 	}
+	}
 
 	/**
 	* load the user contacts
@@ -181,7 +183,7 @@ class Hybrid_Providers_Facebook extends Hybrid_Provider_Model
 		}
 
 		return $contacts;
- 	}
+	}
 
 	/**
 	* update user status
@@ -203,7 +205,7 @@ class Hybrid_Providers_Facebook extends Hybrid_Provider_Model
 		catch( FacebookApiException $e ){
 			throw new Exception( "Update user status failed! {$this->providerId} returned an error: $e" );
 		}
- 	}
+	}
 
 	/**
 	* load the user latest activity  
@@ -267,5 +269,5 @@ class Hybrid_Providers_Facebook extends Hybrid_Provider_Model
 		}
 
 		return $activities;
- 	}
+	}
 }
