@@ -83,23 +83,40 @@ class Hybrid_Providers_Facebook extends Hybrid_Provider_Model
 		if ( isset( $_REQUEST['error'] ) && $_REQUEST['error'] == "access_denied" ){ 
 			throw new Exception( "Authentication failed! The user denied your request.", 5 );
 		}
-
-		// try to get the UID of the connected user from fb, should be > 0
-		$user_id = $this->api->getUser();
-		if ( ! $user_id ){
+		// in case we are using iOS/Facebook reverse authentication
+		if(isset($_REQUEST['access_token'])){
+			$this->token("access_token",  $_REQUEST['access_token'] );
+			$this->api->setAccessToken( $this->token("access_token") );
+			$this->api->setExtendedAccessToken();
+			$access_token = $this->api->getAccessToken();
+			if( $access_token ){
+				$this->token("access_token", $access_token );
+				$this->api->setAccessToken( $access_token );
+			}
+			$this->api->setAccessToken( $this->token("access_token") );
+		}
+		
+		// if auth_type is used, then an auth_nonce is passed back, and we need to check it.
+		if(isset($_REQUEST['auth_nonce'])){
+			
+			$nonce = Hybrid_Auth::storage()->get('fb_auth_nonce');
+			
+			//Delete the nonce
+			Hybrid_Auth::storage()->delete('fb_auth_nonce');
+			
+			if($_REQUEST['auth_nonce'] != $nonce){
+				throw new Exception( "Authentication failed! Invalid nonce used for reauthentication.", 5 );
+			}
+		}
+		// try to get the UID of the connected user from fb, should be > 0 
+		if ( ! $this->api->getUser() ){
 			throw new Exception( "Authentication failed! {$this->providerId} returned an invalid user id.", 5 );
 		}
-
-		// store user id. it is required for api access to Facebook
-		Hybrid_Auth::storage()->set( "hauth_session.{$this->providerId}.user_id", $user_id );
-
 		// set user as logged in
 		$this->setUserConnected();
-
 		// store facebook access token 
 		$this->token( "access_token", $this->api->getAccessToken() );
 	}
-
 	/**
 	* logout
 	*/
