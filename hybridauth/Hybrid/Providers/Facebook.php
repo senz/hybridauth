@@ -134,7 +134,7 @@ class Hybrid_Providers_Facebook extends Hybrid_Provider_Model
 	{
 		// request user profile from fb api
 		try{ 
-			$data = $this->api->api('/me'); 
+			$data = $this->api->api('/me?fields=' . implode(',', $this->config["fields"]));
 		}
 		catch( FacebookApiException $e ){
 			throw new Exception( "User profile request failed! {$this->providerId} returned an error: $e", 6 );
